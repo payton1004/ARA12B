@@ -1,0 +1,59 @@
+import matplotlib.pyplot as plt
+import pandas as pd
+from matplotlib import rc
+import datetime
+import re
+import os
+from glob import glob
+import numpy as np
+import string
+from matplotlib import dates
+import timeit
+
+date_fmt = '%d-%b-%Y %H:%M'
+date_formatter = dates.DateFormatter(date_fmt)
+
+# def plot_DO2Ar(df):
+#     fig, ax = plt.subplots(1, 1, figsize=(12, 8) ,sharex=True)
+#     df.plot(x='UTC', y='DO2/Ar (%)', 
+#     ax=ax, ls=' ',marker='o',  ms=7, mfc="blue", mew=0.25, alpha=.5, mec='black',clip_on=False, zorder=100, legend=False)
+#     ax.set_ylabel('$\Delta$O$_2$/Ar (%)', weight = 'semibold')
+#     ax.set_xlabel('Date', weight = 'semibold')
+#     _dir='/Users/jung-ok/work1/ARA12B/plot/EIMS/'
+#     fname='DO2Ar_10min.png'
+#     plt.savefig(_dir+fname)
+#     plt.show()
+
+def plot_air_saturation(df, _dir, fname, iname):
+    fig, ax = plt.subplots(1, 1, figsize=(12, 8))
+    df[df['flag']==1].plot(x='UTC', y='Air Saturation [%]', 
+    ax=ax, ls=' ',marker='o',  ms=7, mfc="blue", mew=0.25, alpha=.5, mec='black',clip_on=False, zorder=100, label=iname)
+    ax.set_ylabel('Air Saturation [%]', weight = 'semibold')
+    ax.set_xlabel('Date', weight = 'semibold')
+    ax.xaxis.set_major_formatter(date_formatter)
+    plt.savefig(_dir+fname)
+    plt.show()
+
+### EIMS, Air Saturation
+_dir='/Users/jung-ok/work1/ARA12B/processed/EIMS/'
+fname='DO2Ar_calibrated_10min.csv'
+df = pd.read_csv(_dir+fname, index_col=None, parse_dates=[0])
+
+# plot_DO2Ar(df[df['flag']==1])
+
+df['Air Saturation [%]'] = df['m32m40']/df['O2/Ar_interp'] * 100
+
+iname='EIMS'
+_dir='/Users/jung-ok/work1/ARA12B/plot/EIMS/'
+fname='EIMS_Air_Saturation_10min.png'
+plot_air_saturation(df, _dir, fname, iname)
+
+### Optode, Air Saturation
+_dir='/Users/jung-ok/work1/ARA12B/processed/Optode/'
+fname='Optode_all_10min.csv'
+dg = pd.read_csv(_dir+fname, index_col=None, parse_dates=[0])
+
+iname='Optode'
+_dir='/Users/jung-ok/work1/ARA12B/plot/Optode/'
+fname='Optode_Air_Saturation_10min.png'
+plot_air_saturation(dg.dropna(), _dir, fname, iname)
